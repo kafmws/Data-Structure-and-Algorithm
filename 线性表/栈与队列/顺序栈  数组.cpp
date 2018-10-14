@@ -1,10 +1,11 @@
 #include<stdio.h> 
 #include<stdlib.h>
+#include<math.h>
 
 #define size 100
 
 typedef struct dataElement{
-	int num;
+	char num[10];
 }Element;
 
 typedef struct stackStruct{
@@ -54,8 +55,11 @@ int push(Stack *stack, Element data ){
 
 int main(){
 	Stack *stack = NULL;
-	printf("%p\n",stack); 
-	printf("%d\n",initStack (&stack));
-	printf("%p",stack);
+	double a = 65+128;
+	printf("%c\n\n",(char)((int)a%128));
+	printf("%g\n\n",pow(2,3));
+//	printf("%p\n",stack); 
+//	printf("%d\n",initStack (&stack));
+//	printf("%p",stack);
 	return 0;
 } 

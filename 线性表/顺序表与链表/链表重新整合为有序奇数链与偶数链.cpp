@@ -32,14 +32,14 @@ void sort(node *head, node *phead, node *qhead) {
 	head = head->next;
 	while (head) {
 		tem = head->next;
-		if (head->num % 2) { //ż
+		if (head->num % 2) {
 			q = qhead;
 			while (q->next&&q->next->num <= head->num)
 				q = q->next;
 			head->next = q->next;
 			q->next = head;
 		}
-		else {
+		else { //ż
 			p = phead;
 			while (p->next&&p->next->num <= head->num)
 				p = p->next;

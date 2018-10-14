@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
-
+//3172484
 typedef struct personStruct {
 	int num;
 	int password;
@@ -14,17 +14,20 @@ void print(Person *head) {
 	for (; head->next != phead; head = head->next) {
 		printf("%d ", head->num);
 	}
-	printf("%d\n", head->num);
+	printf("%d\n", head->num); 
 }
 
 Person *initList(Person *head) {
-	int i;
+	int i,password;
 	printf("请输入人数:");
 	scanf("%d", &pnum);
 	Person *p, *tail = head;
 	for (i = 1; i <= pnum; i++) {
 		p = (Person *)malloc(sizeof(Person));
-		p->num = p->password = i;
+		p->num = i;
+		printf("请输入第%d个人的密码:");
+		scanf("%d",&password);
+		p->password  = password;
 		p->next = NULL;
 		if (head == NULL) {
 			head = tail = p;
@@ -76,7 +79,7 @@ int main() {
 	Person *head = NULL;
 	head = initList(head);
 	head = process(head);
-	printf("最后的人是%d",head->num);
+	printf("最后的人是%d,password是%d\n",head->num,head->password);
 	system("pause");
 	return 0;
 }
