@@ -1,5 +1,4 @@
 #include"pch.h"
-#include"BinaryTree.h"
 
 void initStack(Stack **ps) {
 	*ps = (Stack *)malloc(sizeof(Stack));
