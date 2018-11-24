@@ -11,7 +11,12 @@
 
 // TODO: 添加要在此处预编译的标头
 #include<stdio.h>
-#include<stdlib.h>
 #include<string.h>
+#include<stdlib.h>
+#include<math.h>
+#include"CommonDefine.h"
+#include"Queue.h"
+#include"AdjacencyMatrix.h"
+#include"AdjList.h"
 #endif //PCH_H
 
