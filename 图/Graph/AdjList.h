@@ -1,23 +1,18 @@
 #pragma once
 
-typedef struct AdjUN{
-	int index;
-	struct AdjUN *next;
-}UNode;
-
-typedef struct AdjDN{
+typedef struct adjNode {
 	int index;
 	int weight;
-	struct AdjDN *next;
-}DNode;
+	struct adjNode *next;
+}AdjNode;
 
 typedef struct {
 	GraphNodeType node;
-	void *tail;//循环链表
-}AdjListNode;
+	AdjNode *tail;//循环链表
+}AdjListElement;
 
 typedef struct adjList {
-	AdjListNode nodes[GraphNodesMax];
+	AdjListElement nodes[GraphNodesMax];
 	struct adjList *re;			//入表
 	char isVisited[GraphNodesMax];
 	int nodeNum;
@@ -41,3 +36,15 @@ void DepthFirstSearch(AdjList * a, int index);
 void BroadFirstSearch(AdjList * a, int index);
 
 int TravelGraph(AdjList * a, void(*func)(AdjList *a, int index));
+
+int cntConnectedComponent(AdjList * a);
+
+int cntOutDegree(AdjList * a, int index);
+
+int cntInDegree(AdjList * a, int index);
+
+int cntOutDegree(AdjList * a, GraphNodeType node);
+
+int cntInDegree(AdjList * a, GraphNodeType node);
+
+int cntDegree(AdjList * a, GraphNodeType node);

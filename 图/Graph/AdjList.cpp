@@ -1,233 +1,156 @@
 #include"pch.h"
 
-void initGraph(AdjList **aa) {
+void initGraph(AdjList ** aa) {//初始化图
 	(*aa) = (AdjList *)malloc(sizeof(AdjList));
 	memset(*aa, 0, sizeof(char) * sizeof(AdjList));
 }
 
-int getNodeIndex(AdjList *a, char c) {
+int getNodeIndex(AdjList *a, GraphNodeType node) {//得到结点下标
 	for (int i = 0; i < a->nodeNum; i++) {
-		if (a->nodes[i].node == c)
+		if (a->nodes[i].node != node)
 			return i;
 	}
+	printf("error, node NotFound\n");
 	return -1;
 }
 
-void drawGraph(AdjList *a) {
-	ReAdjList *re = NULL;
-	int t;
+void drawGraph(AdjList * a) {//填充图
+	AdjList *re = NULL;
 	printf("Is this graph directed?(0/1):");
+	int t;
 	scanf("%d", &t);
-	if (t == DIRECTED) {
-		re = a->re = (ReAdjList *)malloc(sizeof(ReAdjList));
-		memset(re, 0, sizeof(char) * sizeof(ReAdjList));
+	if (t) {
+		initGraph(&a->re);
+		re = a->re;
 		re->re = a;
 	}
 	else if (t != UNDIRECTED) {
 		printf("data error, resume it's undirected.\n");
 	}
-	printf("Please input the amount of the nodes:");
-	scanf("%d%*c", &a->nodeNum);
-	if (re)re->nodeNum = a->nodeNum;
-	printf("Please input every node:\n");
-	for (int i = 0; i < a->nodeNum; i++) {
+	printf("please input the amount of the nodes:");
+	scanf("%d", &a->nodeNum);
+	printf("please input every node:");
+	for (int i = 0; i < a->nodeNum; i++)
 		scanf("%c%*c", &(a->nodes[i].node));
-	}
-	if (re) {//有向网
+	printf("please input the amount of the sides:");
+	scanf("%d%*c", &a->sideNum);
+	if (re) {
+		re->nodeNum = a->nodeNum;
+		re->sideNum = re->sideNum;
 		for (int i = 0; i < a->nodeNum; i++)
 			re->nodes[i].node = a->nodes[i].node;
 	}
-	printf("Please input the amount of the sides:");
-	scanf("%d%*c", &a->sideNum);
-	if (re)re->sideNum = a->sideNum;
-	printf("Please input the start node and end node of each side:\n");
+	printf("please input the start node and the end node:");
 	for (int i = 0; i < a->sideNum; i++) {
 		int startIndex = getNodeIndex(a, getchar());
 		int endIndex = getNodeIndex(a, getchar());
 		getchar();
-		if (startIndex == -1 || endIndex == -1) {
-			printf("error");
+		if (startIndex == -1 || endIndex == -1 || startIndex == endIndex)
 			exit(1);
+		AdjNode *p = (AdjNode *)malloc(sizeof(AdjNode));
+		printf("please input its weight:");
+		scanf("%d%*c", &p->weight);
+		p->index = endIndex;
+		if (a->nodes[startIndex].tail == NULL) {
+			a->nodes[startIndex].tail = p;
 		}
-		if (re) {//有向网记录权重
-			printf("Please input its weight:");
-			scanf("%d%*c", &t);
-			DNode *p = (DNode *)malloc(sizeof(DNode));//出表
-			p->index = endIndex;
-			DNode *q = (DNode *)malloc(sizeof(DNode));//入表
-			q->index = startIndex;
-			p->weight = q->weight = t;
-			if (a->nodes[startIndex].tail == NULL) {//链表为空时
-				p->next = p;
-				a->nodes[startIndex].tail = p;
-			}
-			else {//链表不为空时
-				p->next = ((DNode *)a->nodes[startIndex].tail)->next;
-				((DNode *)a->nodes[startIndex].tail)->next = p;
-				a->nodes[startIndex].tail = p;
-			}
-			if (re->nodes[endIndex].tail == NULL) {//链表为空时
-				q->next = q;
-				re->nodes[endIndex].tail = q;				//bug
-			}
-			else {
-				q->next = ((DNode *)re->nodes[endIndex].tail)->next;
-				((DNode *)re->nodes[endIndex].tail)->next = q;
-				re->nodes[endIndex].tail = q;
-			}
+		else {
+			p->next = a->nodes[startIndex].tail->next;
+			a->nodes[startIndex].tail->next = p;
+			a->nodes[startIndex].tail = p;
 		}
-		else {//无向网
-			UNode *p = (UNode *)malloc(sizeof(UNode));
-			p->index = endIndex;
-			UNode *q = (UNode *)malloc(sizeof(UNode));
-			q->index = startIndex;
-			if (a->nodes[startIndex].tail == NULL) {//空链表	
-				p->next = p;
-				a->nodes[startIndex].tail = p;
+		if (re) {
+			p->index = startIndex;
+			if (re->nodes[endIndex].tail == NULL) {
+				re->nodes[endIndex].tail = p;
 			}
 			else {
-				p->next = ((UNode *)a->nodes[startIndex].tail)->next;
-				((UNode *)a->nodes[startIndex].tail)->next = p;
-				a->nodes[startIndex].tail = p;
-			}
-			if (a->nodes[endIndex].tail == NULL) {//空链表	
-				q->next = q;
-				a->nodes[endIndex].tail = q;
-			}
-			else {
-				q->next = ((UNode *)a->nodes[endIndex].tail)->next;
-				((UNode *)a->nodes[endIndex].tail)->next = q;
-				a->nodes[endIndex].tail = q;
+				p->next = re->nodes[endIndex].tail->next;
+				re->nodes[endIndex].tail->next = p;
+				re->nodes[endIndex].tail = p;
 			}
 		}
 	}
-	//print(a);
+		
 }
 
-void printDNList(AdjList *a) {
+void printAdjList(AdjList *a) {
 	for (int i = 0; i < a->nodeNum; i++) {
-		printf("%c : ", a->nodes[i].node);
-		DNode *head = a->nodes[i].tail == NULL ? NULL : ((DNode *)a->nodes[i].tail)->next;
-		DNode *p = head;
-		if (p) {
-			for (; p != a->nodes[i].tail; p = p->next) {
-				printf("%2d/%d ", p->index, p->weight);
-			}
-			printf("%2d/%d", p->index, p->weight);
+		printf("%c:",a->nodes[i].node);
+		AdjNode *tail = a->nodes[i].tail;
+		if (tail) {
+			AdjNode *p = tail->next;
+			for (; p != tail; p = p->next)
+				printf("%3d/%3d ", p->index, p->weight);
+			printf("%3d/%3d ", p->index, p->weight);
 		}
 		printf("\n");
 	}
 }
 
-void print(AdjList *a) {
-	if(a->re == NULL){
-		for (int i = 0; i < a->nodeNum; i++) {
-			printf("%c : ", a->nodes[i].node);
-			UNode *head = a->nodes[i].tail == NULL ? NULL : ((UNode *)a->nodes[i].tail)->next;
-			UNode *p = head;
-			if (p) {
-				for (; p != a->nodes[i].tail; p = p->next) {
-					printf("%2d ", p->index);
-				}
-				printf("%2d", p->index);
-			}
-			printf("\n");
-		}
-	}
-	else {//有向网
-		printf("OUT\n");
-		printDNList(a);
-		printf("IN\n");
-		printDNList(a->re);//打印逆邻接表
+void print(AdjList * a) {
+	printf("OutList:\n");
+	printAdjList(a);
+	if (a->re) {
+		printf("InList:\n");
+		printAdjList(a->re);
 	}
 }
 
-int isDirected(AdjList *a) {
-	return a->re == NULL;
+int isDirected(AdjList * a){//是否为有向图
+	return a->re != NULL;
 }
 
-void DepthFirstSearch(AdjList *a, int index) {
-	AdjListNode node = a->nodes[index];
-	printf("%c", node.node);
+void DepthFirstSearch(AdjList * a, int index){
+	if (index <0 || index>a->nodeNum)
+		return;
+	printf("%c", a->nodes[index].node);
 	a->isVisited[index]++;
-	if (a->re == UNDIRECTED && node.tail) {//无向图
-		UNode *head = ((UNode *)node.tail)->next;
-		while (head != node.tail) {
-			if (a->isVisited[head->index] == 0)
+	AdjNode *tail = a->nodes[index].tail;
+	if (tail) {
+		AdjNode *head = tail->next;
+		for (; head != tail; head = head->next) {
+			if (a->isVisited[index] == 0)
 				DepthFirstSearch(a, head->index);
-			head = head->next;
-		}//head == node.tail
-		if (a->isVisited[head->index] == 0)
-			DepthFirstSearch(a, head->index);
-	}
-	else if(node.tail){//有向网
-		DNode *head = ((DNode *)node.tail)->next;
-		while (head != node.tail) {
-			if (a->isVisited[head->index] == 0)
-				DepthFirstSearch(a, head->index);
-			head = head->next;
 		}
-		if (a->isVisited[head->index] == 0)
+		if (a->isVisited[index] == 0)
 			DepthFirstSearch(a, head->index);
 	}
 }
 
-//void BroadFirstSearch(AdjList *a, int index) {
-//	if (a->isVisited[index])
-//		return;
-//	AdjListNode node = a->nodes[index];
-//	printf("%c", a->nodes[index].node);
-//	a->isVisited[index]++;
-//	if (a->re == NULL && node.tail) {//无向图
-//		UNode *head = ((UNode *)node.tail)->next;
-//		for (; head != node.tail; head = head->next) {
-//			if (a->isVisited[head->index] == 0) {
-//				printf("%c", a->nodes[head->index].node);
-//			}
-//		}
-//		if (a->isVisited[head->index] == 0) {
-//			printf("%c", a->nodes[head->index].node);
-//		}
-//		for (head = head->next; head != node.tail; head = head->next) {
-//				BroadFirstSearch(a, head->index);
-//		}
-//			BroadFirstSearch(a, head->index);
-//	}
-//}
-
-void BroadFirstSearch(AdjList *a, int index) {
+void BroadFirstSearch(AdjList * a, int index){
+	if (index <0 || index>a->nodeNum)
+		return;
 	Queue *q = NULL;
 	initQueue(&q);
 	enterQueue(q, index);
-	int next;
+	int currentIndex;
 	while (!isEmpty(q)) {
-		quitQueue(q, &next);
-		AdjListNode node = a->nodes[next];
-		printf("%c", node.node);
-		a->isVisited[next]++;
-		if (a->re == NULL && node.tail) {
-			for (UNode *p = ((UNode *)node.tail)->next; p != node.tail; p = p->next) {
-				if (a->isVisited[p->index] == 0)
-					enterQueue(q, p->index);
+		quitQueue(q,&currentIndex);
+		printf("%c",a->nodes[currentIndex].node);
+		a->isVisited[currentIndex]++;
+		AdjNode *tail = a->nodes[currentIndex].tail;
+		if (tail) {
+			AdjNode *head = tail->next;
+			for (; head != tail; head = head->next) {
+				if (a->isVisited[head->index] == 0)
+					enterQueue(q, head->index);
 			}
-		}
-		else if (node.tail) {
-			for (DNode *p = ((DNode *)node.tail)->next; p != node.tail; p = p->next) {
-				if (a->isVisited[p->index] == 0)
-					enterQueue(q, p->index);
-			}
+			if (a->isVisited[head->index] == 0)
+				enterQueue(q, head->index);
 		}
 	}
 }
 
-int TravelGraph(AdjList *a, void (*func)(AdjList *a, int index)) {
-	memset(a->isVisited, 0, sizeof(char) * sizeof(a->isVisited));
+int TravelGraph(AdjList * a, void(*func)(AdjList *a, int index)){
 	int cnt = 0;
 	for (int i = 0; i < a->nodeNum; i++) {
 		if (a->isVisited[i] == 0) {
-			(*func)(a, i); cnt++;
+			(*func)(a, i);
+			cnt++;
 		}
 	}
+	memset(a->isVisited, 0, sizeof(char) * sizeof(a->isVisited));
 	return cnt;
 }
 
@@ -236,26 +159,35 @@ int cntConnectedComponent(AdjList *a) {
 }
 
 int cntOutDegree(AdjList *a, int index) {
+	if (index < 0 || index >= a->nodeNum)
+		return -1;
 	int cnt = 0;
-	void *tail = a->nodes[index].tail;
+	AdjNode *tail = a->nodes[index].tail;
 	if (tail) {
-		if (a->re == NULL)
-			for (UNode *p = ((UNode *)tail)->next; p != tail;p = p->next,cnt++);
-		else
-			for (UNode *p = ((UNode *)tail)->next; p != tail; p = p->next, cnt++);
+		for (AdjNode *p = tail->next; p != tail; p = p->next, cnt++);
 		return cnt + 1;
 	}
 	return cnt;
 }
 
 int cntInDegree(AdjList *a, int index) {
-
+	if (index < 0 || index >= a->nodeNum)
+		return -1;
+	return a->re ? cntOutDegree(a->re, index) : cntOutDegree(a, index);
 }
 
 int cntOutDegree(AdjList *a, GraphNodeType node) {
-
+	return cntOutDegree(a, getNodeIndex(a, node));
 }
 
 int cntInDegree(AdjList *a, GraphNodeType node) {
+	return cntInDegree(a, getNodeIndex(a, node));
+}
 
+int cntDegree(AdjList *a, GraphNodeType node) {
+	int index = getNodeIndex(a, node);
+	int cntOut = cntOutDegree(a, index);
+	if (a->re == NULL || cntOut == -1)
+		return cntOut;
+	return cntOut + cntInDegree(a, index);
 }

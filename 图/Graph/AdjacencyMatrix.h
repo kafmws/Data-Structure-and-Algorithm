@@ -25,6 +25,10 @@ int TravelGraph(AdjMatrix * a, void(*func)(AdjMatrix *a, int nodeIndex));
 
 int cntConnectedComponent(AdjMatrix * a);
 
+int cntOutDegree(AdjMatrix * a, int index);
+
+int cntInDegree(AdjMatrix * a, int index);
+
 int cntOutDegree(AdjMatrix * a, GraphNodeType node);
 
 int cntInDegree(AdjMatrix * a, GraphNodeType node);

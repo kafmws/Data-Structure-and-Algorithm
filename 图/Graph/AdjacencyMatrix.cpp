@@ -27,6 +27,7 @@ int getNodeIndex(AdjMatrix *a,GraphNodeType c) {
 		if (a->nodes[i] == c)
 			return i;
 	}
+	printf("error ,node NotFound\n");
 	return -1;
 }
 
@@ -50,7 +51,6 @@ void drawGraph(AdjMatrix *a) {
 		getchar();
 		//printf("%d %d\n", startIndex, endIndex);
 		if (startIndex == -1 || endIndex == -1) {//startIndex == endIndex
-			printf("error");
 			exit(1);
 		}
 		if (a->isDirected == DIRECTED) {//有向网记录权重
@@ -116,13 +116,13 @@ void BroadFirstSearch(AdjMatrix *a, int nodeIndex) {
 }
 
 int TravelGraph(AdjMatrix *a, void(*func)(AdjMatrix *a, int nodeIndex)) {
-	memset(a->isVisited, 0, sizeof(char) * sizeof(a->isVisited));//重置标记数组
 	int cnt = 0;
 	for (int index = 0; index < a->nodeNum; index++) {
 		if (!a->isVisited[index]) {
 			(*func)(a, index); cnt++;
 		}
 	}
+	memset(a->isVisited, 0, sizeof(char) * sizeof(a->isVisited));//重置标记数组
 	return cnt;
 }
 
@@ -131,6 +131,8 @@ int cntConnectedComponent(AdjMatrix *a) {//计算图的连通分量数
 }
 
 int cntOutDegree(AdjMatrix *a,int index) {//结点的出度
+	if (index < 0 || index >= a->nodeNum)
+		return -1;
 	int cnt = 0;
 	for (int i = 0; i < a->nodeNum; i++) {
 		if (a->sides[index][i])cnt++;
@@ -139,6 +141,8 @@ int cntOutDegree(AdjMatrix *a,int index) {//结点的出度
 }
 
 int cntInDegree(AdjMatrix *a, int index) {//结点的入度
+	if (index < 0 || index >= a->nodeNum)
+		return -1;
 	int cnt = 0;
 	for (int i = 0; i < a->nodeNum; i++) {
 		if (a->sides[i][index])cnt++;
@@ -150,35 +154,34 @@ int cntOutDegree(AdjMatrix *a, GraphNodeType node) {//有向网中结点的出度
 	//if(a->isDirected == UNDIRECTED){
 	//	printf("using cntDegree in undirected graph is supposed.\n");
 	//}
-	int cnt = 0;
+	/*int cnt = 0;
 	int index = getNodeIndex(a, node);
+	if(index < 0)return -1;
 	for (int i = 0; i < a->nodeNum; i++) {
 		if (a->sides[index][i])cnt++;
 	}
-	return cnt;
+	return cnt;*/
+	return cntOutDegree(a, getNodeIndex(a, node));
 }
 
 int cntInDegree(AdjMatrix *a, GraphNodeType node) {//有向网中结点的入度
 	/*if (a->isDirected == UNDIRECTED) {
 		printf("using cntDegree in undirected graph is supposed.\n");
 	}*/
-	int cnt = 0;
+	/*int cnt = 0;
 	int index = getNodeIndex(a, node);
+	if (index < 0)return - 1;
 	for (int i = 0; i < a->nodeNum; i++) {
 		if (a->sides[i][index])cnt++;
 	}
-	return cnt;
+	return cnt;*/
+	return cntInDegree(a, getNodeIndex(a, node));
 }
 
 int cntDegree(AdjMatrix *a, GraphNodeType node) {//计算某结点的度
-	int index = 0;
-	index = getNodeIndex(a, node);
-	if (index == -1) {
-		printf("error ,NotFound\n");
-		return -1;
-	}
+	int index = getNodeIndex(a, node);
 	int cntOut = cntOutDegree(a, index);
-	if (a->isDirected == UNDIRECTED)
+	if (a->isDirected == UNDIRECTED || cntOut == -1)
 		return cntOut;
 	int cntIn = cntInDegree(a, index);
 	return cntOut + cntIn;
