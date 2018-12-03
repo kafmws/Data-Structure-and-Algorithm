@@ -34,3 +34,13 @@ int cntOutDegree(AdjMatrix * a, GraphNodeType node);
 int cntInDegree(AdjMatrix * a, GraphNodeType node);
 
 int cntDegree(AdjMatrix * a, GraphNodeType node);
+
+int addNode(AdjMatrix * a, GraphNodeType node);
+
+void addNode(AdjMatrix * a);
+
+int addSide(AdjMatrix * a, int startIndex, int endIndex, int weight);
+
+int addSide(AdjMatrix * a, GraphNodeType startNode, GraphNodeType endNode, int weight);
+
+int addSide(AdjMatrix * a);

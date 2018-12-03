@@ -7,7 +7,7 @@ void initGraph(AdjList ** aa) {//初始化图
 
 int getNodeIndex(AdjList *a, GraphNodeType node) {//得到结点下标
 	for (int i = 0; i < a->nodeNum; i++) {
-		if (a->nodes[i].node != node)
+		if (a->nodes[i].node == node)
 			return i;
 	}
 	printf("error, node NotFound\n");
@@ -17,21 +17,27 @@ int getNodeIndex(AdjList *a, GraphNodeType node) {//得到结点下标
 void drawGraph(AdjList * a) {//填充图
 	AdjList *re = NULL;
 	printf("Is this graph directed?(0/1):");
-	int t;
-	scanf("%d", &t);
-	if (t) {
+	int isDirected;
+	scanf("%d", &isDirected);
+	if (isDirected) {
 		initGraph(&a->re);
 		re = a->re;
 		re->re = a;
 	}
-	else if (t != UNDIRECTED) {
+	else if (isDirected != UNDIRECTED) {
 		printf("data error, resume it's undirected.\n");
 	}
+	printf("Does every side own its weight?(0/1):");
+	int ownWeight;
+	scanf("%d", &ownWeight);
+	if (ownWeight != 0 && ownWeight != 1)
+		ownWeight = 0, printf("data error, resume it doesn't.");
 	printf("please input the amount of the nodes:");
 	scanf("%d", &a->nodeNum);
-	printf("please input every node:");
+	printf("please input every node:\n");
+	rewind(stdin);
 	for (int i = 0; i < a->nodeNum; i++)
-		scanf("%c%*c", &(a->nodes[i].node));
+		scanf("%c%", &(a->nodes[i].node));
 	printf("please input the amount of the sides:");
 	scanf("%d%*c", &a->sideNum);
 	if (re) {
@@ -40,38 +46,52 @@ void drawGraph(AdjList * a) {//填充图
 		for (int i = 0; i < a->nodeNum; i++)
 			re->nodes[i].node = a->nodes[i].node;
 	}
-	printf("please input the start node and the end node:");
+	AdjList *choice = re ? re : a;
 	for (int i = 0; i < a->sideNum; i++) {
+		printf("please input the start node and the end node:\n");
 		int startIndex = getNodeIndex(a, getchar());
 		int endIndex = getNodeIndex(a, getchar());
 		getchar();
 		if (startIndex == -1 || endIndex == -1 || startIndex == endIndex)
 			exit(1);
 		AdjNode *p = (AdjNode *)malloc(sizeof(AdjNode));
-		printf("please input its weight:");
-		scanf("%d%*c", &p->weight);
+		if (ownWeight) {
+			printf("please input its weight:");
+			scanf("%d%*c", &p->weight);
+		}
+		else
+			p->weight = 1;
 		p->index = endIndex;
 		if (a->nodes[startIndex].tail == NULL) {
 			a->nodes[startIndex].tail = p;
+			a->nodes[startIndex].tail->next = a->nodes[startIndex].tail;
 		}
 		else {
 			p->next = a->nodes[startIndex].tail->next;
 			a->nodes[startIndex].tail->next = p;
 			a->nodes[startIndex].tail = p;
 		}
-		if (re) {
-			p->index = startIndex;
-			if (re->nodes[endIndex].tail == NULL) {
-				re->nodes[endIndex].tail = p;
-			}
-			else {
-				p->next = re->nodes[endIndex].tail->next;
-				re->nodes[endIndex].tail->next = p;
-				re->nodes[endIndex].tail = p;
-			}
+		AdjNode *q = (AdjNode *)malloc(sizeof(AdjNode));
+		q->weight = p->weight;
+		int index;
+		if (choice == re) {//有向图
+			q->index = startIndex;
+			index = endIndex;
+		}
+		else {//无向图
+			q->index = startIndex;
+			index = endIndex;
+		}
+		if (choice->nodes[index].tail == NULL) {
+			choice->nodes[index].tail = q;
+			choice->nodes[index].tail->next = choice->nodes[index].tail;
+		}
+		else {
+			q->next = choice->nodes[index].tail->next;
+			choice->nodes[index].tail->next = q;
+			choice->nodes[index].tail = q;
 		}
 	}
-		
 }
 
 void printAdjList(AdjList *a) {
@@ -123,21 +143,26 @@ void BroadFirstSearch(AdjList * a, int index){
 		return;
 	Queue *q = NULL;
 	initQueue(&q);
-	enterQueue(q, index);
+	if (a->isVisited[index] == 0) {
+		enterQueue(q, index);
+		a->isVisited[index]++;
+	}
 	int currentIndex;
 	while (!isEmpty(q)) {
 		quitQueue(q,&currentIndex);
 		printf("%c",a->nodes[currentIndex].node);
-		a->isVisited[currentIndex]++;
 		AdjNode *tail = a->nodes[currentIndex].tail;
 		if (tail) {
 			AdjNode *head = tail->next;
-			for (; head != tail; head = head->next) {
-				if (a->isVisited[head->index] == 0)
+			for (; head != tail; head = head->next)
+				if (a->isVisited[head->index] == 0) {
 					enterQueue(q, head->index);
-			}
-			if (a->isVisited[head->index] == 0)
+					a->isVisited[head->index]++;
+				}
+			if (a->isVisited[head->index] == 0) {
 				enterQueue(q, head->index);
+				a->isVisited[head->index]++;
+			}
 		}
 	}
 }
@@ -190,4 +215,49 @@ int cntDegree(AdjList *a, GraphNodeType node) {
 	if (a->re == NULL || cntOut == -1)
 		return cntOut;
 	return cntOut + cntInDegree(a, index);
+}
+
+void getTopologicalOrder(AdjList *a) {
+	AdjList *re = a->re;
+	if (re == NULL)
+		return;
+	int inDegree[GraphNodesMax] = { 0 };
+	for (int i = 0; i < a->nodeNum; i++) {
+		int cnt = 0;
+		AdjNode *tail = re->nodes[i].tail;
+		if (tail) {
+			for (AdjNode *head = tail->next; head != tail; head = head->next, cnt++);
+			cnt++;
+		}
+		inDegree[i] = cnt;
+	}
+	char order[GraphNodesMax + 1] = { 0 };
+	int cnt = 0, flag;
+	for(int j = 0;j<a->nodeNum;j++) {
+		flag = 0;
+		for (int i = 0; i < a->nodeNum; i++) {
+			if (inDegree[i] == 0 && a->isVisited[i] == 0) {
+				order[cnt++] = a->nodes[i].node;
+				a->isVisited[i]++;
+				flag = 1;
+				AdjNode *tail = a->nodes[i].tail;
+				if (tail) {
+					for (AdjNode *head = tail->next; head != tail; head = head->next)
+						inDegree[head->index]--;
+					inDegree[tail->index]--;
+				}
+			}	
+		}
+		if (flag == 0) {
+				flag = -1;
+				break;
+			}
+		if (flag == -1)
+			break;
+	}
+	if (cnt == a->nodeNum)
+		printf("topological order : %s", order);
+	else
+		printf("no topological order exists.");
+	printf("\n");
 }

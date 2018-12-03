@@ -9,7 +9,7 @@ void initGraph(AdjMatrix **am) {
 }
 
 void print(AdjMatrix *a) {
-	printf("  ");
+	printf("   ");
 	for (int i = 0; i < a->nodeNum; i++)
 		printf(" %c ", a->nodes[i]);
 	printf("\n");
@@ -36,6 +36,12 @@ void drawGraph(AdjMatrix *a) {
 	printf("Is this graph directed?(0/1):");
 	scanf("%d", &t);
 	a->isDirected = (t == 0 || t == 1) ? t : printf("data error, resume it's undirected.\n"),UNDIRECTED;
+	if (t == 0) {
+		printf("Is it own weight for each side?(0/1):");
+		scanf("%d",&t);
+		if (t != 0 && t != 1)
+			printf("data error, resume it isn't.\n");
+	}
 	printf("Please input the amount of the nodes:");
 	scanf("%d%*c", &a->nodeNum);
 	printf("Please input every node:\n");
@@ -53,14 +59,18 @@ void drawGraph(AdjMatrix *a) {
 		if (startIndex == -1 || endIndex == -1) {//startIndex == endIndex
 			exit(1);
 		}
-		if (a->isDirected == DIRECTED) {//有向网记录权重
+		if (a->isDirected == DIRECTED || t == 1) {//记录权重
 			printf("Please input its weight:");
-			scanf("%c%*c", &(a->sides[startIndex][endIndex]));
+			int tem;
+			scanf("%d%*c", &tem);
+			a->sides[startIndex][endIndex] = tem;
+			if (t)
+				a->sides[endIndex][startIndex] = tem;
 		}
 		else {
 			a->sides[startIndex][endIndex] = 1;
 			a->sides[endIndex][startIndex] = 1;
-		}
+		}//print(a);
 	}
 	//print(a);
 }
@@ -98,8 +108,10 @@ void DepthFirstSearch(AdjMatrix *a, int nodeIndex) {
 void BroadFirstSearch(AdjMatrix *a, int nodeIndex) {
 	Queue *q = NULL;
 	initQueue(&q);
-	enterQueue(q, nodeIndex);
-	a->isVisited[nodeIndex]++;
+	if (a->isVisited[nodeIndex]) {
+		enterQueue(q, nodeIndex);
+		a->isVisited[nodeIndex]++;
+	}
 	while (!isEmpty(q)) {
 		if (quitQueue(q, &nodeIndex)) {//出队成功并且
 			printf("%c", a->nodes[nodeIndex]);
@@ -185,4 +197,66 @@ int cntDegree(AdjMatrix *a, GraphNodeType node) {//计算某结点的度
 		return cntOut;
 	int cntIn = cntInDegree(a, index);
 	return cntOut + cntIn;
+}
+
+int addNode(AdjMatrix *a, GraphNodeType node) {
+	for (int i = 0; i < a->nodeNum; i++) {
+		if (a->nodes[i] == node) {
+			printf("there is a node named %c.", node);
+			return 0;
+		}
+	}
+	a->nodes[a->nodeNum++] = node;
+	return 1;
+}
+
+void addNode(AdjMatrix *a) {
+	GraphNodeType c;
+	if (a->nodeNum == GraphNodesMax) {
+		printf("there is no room for another node.");
+		return;
+	}
+	printf("please input the node:");
+	scanf("%c", &c);
+	addNode(a, c);
+	if (a->nodeNum < GraphNodesMax) {
+		printf("ok, do you want to add another node?(0/1)");
+		int t;
+		scanf("%d", &t);
+		if (t)
+			addNode(a);
+	}
+}
+
+int addSide(AdjMatrix *a,int startIndex, int endIndex, int weight) {
+	int t;
+	if (a->sides[startIndex][endIndex]) {
+			printf("this side is already existing.Do you want to override it?(0/1)");
+			scanf("%d",&t);
+			if (t == 0)
+				return 0;
+	}
+	if (a->isDirected)
+		a->sides[startIndex][endIndex] = weight;
+	else
+		a->sides[startIndex][endIndex] = a->sides[endIndex][startIndex] = weight;
+	return 1;
+}
+
+int addSide(AdjMatrix *a, GraphNodeType startNode, GraphNodeType endNode, int weight) {
+	int startIndex = getNodeIndex(a, startNode);
+	int endIndex = getNodeIndex(a, endNode);
+	if (startIndex == -1 || endIndex == -1)
+		return 0;
+	return addSide(a, startIndex, endIndex, weight);
+}
+
+int addSide(AdjMatrix *a) {
+	printf("please input the start and the end node of the side:");
+	GraphNodeType start, end;
+	scanf("%c%c", &start, &end);
+	printf("please input the weight of the side:");
+	int weight;
+	scanf("%d", &weight);
+	return addSide(a, start, end, weight);
 }

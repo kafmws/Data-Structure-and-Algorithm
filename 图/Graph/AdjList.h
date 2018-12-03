@@ -48,3 +48,5 @@ int cntOutDegree(AdjList * a, GraphNodeType node);
 int cntInDegree(AdjList * a, GraphNodeType node);
 
 int cntDegree(AdjList * a, GraphNodeType node);
+
+void getTopologicalOrder(AdjList * a);
