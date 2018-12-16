@@ -37,7 +37,7 @@ void drawGraph(AdjList * a) {//ÃÓ≥‰Õº
 	printf("please input every node:\n");
 	rewind(stdin);
 	for (int i = 0; i < a->nodeNum; i++)
-		scanf("%c%", &(a->nodes[i].node));
+		scanf("%c", &(a->nodes[i].node));
 	printf("please input the amount of the sides:");
 	scanf("%d%*c", &a->sideNum);
 	if (re) {
@@ -217,47 +217,9 @@ int cntDegree(AdjList *a, GraphNodeType node) {
 	return cntOut + cntInDegree(a, index);
 }
 
-void getTopologicalOrder(AdjList *a) {
-	AdjList *re = a->re;
-	if (re == NULL)
-		return;
-	int inDegree[GraphNodesMax] = { 0 };
+void cntDegree(AdjList *a) {
+	printf("node out   in\n");
 	for (int i = 0; i < a->nodeNum; i++) {
-		int cnt = 0;
-		AdjNode *tail = re->nodes[i].tail;
-		if (tail) {
-			for (AdjNode *head = tail->next; head != tail; head = head->next, cnt++);
-			cnt++;
-		}
-		inDegree[i] = cnt;
+		printf(" %c  %3d  %3d\n", a->nodes[i].node, cntOutDegree(a, i), cntInDegree(a, i));
 	}
-	char order[GraphNodesMax + 1] = { 0 };
-	int cnt = 0, flag;
-	for(int j = 0;j<a->nodeNum;j++) {
-		flag = 0;
-		for (int i = 0; i < a->nodeNum; i++) {
-			if (inDegree[i] == 0 && a->isVisited[i] == 0) {
-				order[cnt++] = a->nodes[i].node;
-				a->isVisited[i]++;
-				flag = 1;
-				AdjNode *tail = a->nodes[i].tail;
-				if (tail) {
-					for (AdjNode *head = tail->next; head != tail; head = head->next)
-						inDegree[head->index]--;
-					inDegree[tail->index]--;
-				}
-			}	
-		}
-		if (flag == 0) {
-				flag = -1;
-				break;
-			}
-		if (flag == -1)
-			break;
-	}
-	if (cnt == a->nodeNum)
-		printf("topological order : %s", order);
-	else
-		printf("no topological order exists.");
-	printf("\n");
 }

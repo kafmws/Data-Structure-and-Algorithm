@@ -32,21 +32,19 @@ int getNodeIndex(AdjMatrix *a,GraphNodeType c) {
 }
 
 void drawGraph(AdjMatrix *a) {
-	int t;
+	int isDirceted, ownWeight;
 	printf("Is this graph directed?(0/1):");
-	scanf("%d", &t);
-	a->isDirected = (t == 0 || t == 1) ? t : printf("data error, resume it's undirected.\n"),UNDIRECTED;
-	if (t == 0) {
-		printf("Is it own weight for each side?(0/1):");
-		scanf("%d",&t);
-		if (t != 0 && t != 1)
-			printf("data error, resume it isn't.\n");
-	}
+	scanf("%d", &isDirceted);
+	a->isDirected = (isDirceted == 0 || isDirceted == 1) ? isDirceted : printf("data error, resume it's undirected.\n"),UNDIRECTED;
+	printf("Is it own weight for each side?(0/1):");
+	scanf("%d",&ownWeight);
+	if (ownWeight != 0 && ownWeight != 1)
+		printf("data error, resume it isn't.\n");
 	printf("Please input the amount of the nodes:");
 	scanf("%d%*c", &a->nodeNum);
 	printf("Please input every node:\n");
 	for (int i = 0; i < a->nodeNum; i++) {
-		scanf("%c%*c", &(a->nodes[i]));
+		scanf("%c", &(a->nodes[i]));
 	}
 	printf("Please input the amount of the sides:");
 	scanf("%d%*c", &a->sideNum);
@@ -59,18 +57,18 @@ void drawGraph(AdjMatrix *a) {
 		if (startIndex == -1 || endIndex == -1) {//startIndex == endIndex
 			exit(1);
 		}
-		if (a->isDirected == DIRECTED || t == 1) {//记录权重
+		if (ownWeight == 1) {//记录权重
 			printf("Please input its weight:");
 			int tem;
 			scanf("%d%*c", &tem);
 			a->sides[startIndex][endIndex] = tem;
-			if (t)
-				a->sides[endIndex][startIndex] = tem;
 		}
 		else {
 			a->sides[startIndex][endIndex] = 1;
-			a->sides[endIndex][startIndex] = 1;
-		}//print(a);
+		}
+		if (!isDirceted)
+			a->sides[endIndex][startIndex] = ownWeight ? a->sides[startIndex][endIndex] : 1;
+		//print(a);
 	}
 	//print(a);
 }
@@ -108,7 +106,7 @@ void DepthFirstSearch(AdjMatrix *a, int nodeIndex) {
 void BroadFirstSearch(AdjMatrix *a, int nodeIndex) {
 	Queue *q = NULL;
 	initQueue(&q);
-	if (a->isVisited[nodeIndex]) {
+	if (!a->isVisited[nodeIndex]) {
 		enterQueue(q, nodeIndex);
 		a->isVisited[nodeIndex]++;
 	}
@@ -197,6 +195,13 @@ int cntDegree(AdjMatrix *a, GraphNodeType node) {//计算某结点的度
 		return cntOut;
 	int cntIn = cntInDegree(a, index);
 	return cntOut + cntIn;
+}
+
+void cntDegree(AdjMatrix *a) {
+	printf("node out   in\n");
+	for (int i = 0; i < a->nodeNum; i++) {
+		printf(" %c  %3d  %3d\n", a->nodes[i], cntOutDegree(a, i), cntInDegree(a, i));
+	}
 }
 
 int addNode(AdjMatrix *a, GraphNodeType node) {

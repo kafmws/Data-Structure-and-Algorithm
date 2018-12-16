@@ -25,6 +25,8 @@ typedef AdjList ReAdjList;//ÄæÁÚ½Ó±í
 
 void initGraph(AdjList ** aa);
 
+int getNodeIndex(AdjList * a, GraphNodeType node);
+
 void drawGraph(AdjList * a);
 
 void print(AdjList * a);
@@ -48,5 +50,7 @@ int cntOutDegree(AdjList * a, GraphNodeType node);
 int cntInDegree(AdjList * a, GraphNodeType node);
 
 int cntDegree(AdjList * a, GraphNodeType node);
+
+void cntDegree(AdjList * a);
 
 void getTopologicalOrder(AdjList * a);

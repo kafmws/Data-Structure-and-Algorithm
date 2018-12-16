@@ -30,6 +30,8 @@ typedef AdjListed ReAdjListed;//ÄæÁÚ½Ó±í
 
 void initGraph(AdjListed ** aa);
 
+int getNodeIndex(AdjListed * a, GraphNodeType c);
+
 void drawGraph(AdjListed * a);
 
 void print(AdjListed * a);

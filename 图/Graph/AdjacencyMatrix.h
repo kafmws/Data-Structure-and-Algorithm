@@ -13,6 +13,8 @@ void initGraph(AdjMatrix ** am);
 
 void print(AdjMatrix * a);
 
+int getNodeIndex(AdjMatrix * a, GraphNodeType c);
+
 void drawGraph(AdjMatrix * a);
 
 int isDirected(AdjMatrix * a);
