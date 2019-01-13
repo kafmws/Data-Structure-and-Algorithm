@@ -14,4 +14,5 @@
 #include<string.h>
 #include<stdlib.h>
 #include"HashTable.h"
+#include"sort.h"
 #endif //PCH_H

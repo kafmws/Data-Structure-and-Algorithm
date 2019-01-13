@@ -22,10 +22,10 @@ void print(HashTable *table) {
 	if (table->cnt)
 		printf("key\t\t\tvalue\n");
 	for (int i = 0, cnt = 0; cnt < table->cnt; i++) {
-		if (table->table[i].key && table->table[i].key != table->flag) {
+		if (table->table[i].key && table->table[i].key != table->delFlag) {
 			cnt++;
 			//printf("%s\t\t%4d\n", table->table[i].key, *(int *)table->table[i].value);
-			printf("%-15s\t\t%4d	%d\n", table->table[i].key, *(int *)table->table[i].value,hashCode(table->table[i].key)%TABLESIZE);
+			printf("%-15s\t\t%4d	%d\n", table->table[i].key, *(int *)table->table[i].value,hashCode(table->table[i].key)%table->tableSize);
 		}
 	}
 	if (table->cnt)
@@ -45,19 +45,19 @@ void show() {
 void calculate(HashTable *table) {
 	int ASL = 0;
 	for (int i = 0, cnt = 0; cnt < table->cnt; i++) {
-		if (table->table[i].key&&table->table[i].key != table->flag) {
+		if (table->table[i].key&&table->table[i].key != table->delFlag) {
 			cnt++;
-			int time = 0,hash = -1;
-			hash = hashCode(table->table[i].key)%TABLESIZE;
+			int time = 1,hash = -1;
+			hash = hashCode(table->table[i].key)%table->tableSize;
 			while (hash != i)
-				hash = (hash+1)%TABLESIZE,time++;
+				hash = (hash+1)%table->tableSize,time++;
 			ASL += time;
 		}	
 	}
 	printf("ASL = %f\n", ASL*1.0 / table->cnt);
 }
 
-int main() {
+void HashTableTest() {
 	HashTable hashTable;
 	HashTable *table = &hashTable;
 	initHashTable(table);
@@ -76,5 +76,22 @@ int main() {
 		}
 		getchar();
 	}
+}
+
+void SortTest() {
+	Array a;
+	scanf("%d", &a.length);
+	for (int i = 1; i <= a.length; i++)
+		scanf("%d", &a.num[i]);
+	//DirectInsertSort(&a);
+	//BinarySearchDirectInsertSort(&a);
+	//ShellSort(&a);
+	QuickSort(&a);
+	print(&a);
+}
+
+int main() {
+	HashTableTest();
+	//SortTest();
 	return 0;
 }
